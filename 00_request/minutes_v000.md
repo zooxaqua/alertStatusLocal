@@ -12,7 +12,7 @@ GitHub Copilotを活用したECサイト価格監視ツールのMVP構築方針
 - 初期構成は Python + Playwright + ローカル定期実行（cron）とする。
 - まずは価格取得と通知のコア機能を優先して実装する。
 - 監視対象は `config.json` で管理し、商品名・URL・ターゲット価格を定義する。
-- 通知先は Slack Webhook とし、環境変数 `SLACK_WEBHOOK_URL` から取得する。
+- 通知設定（Webhook URL/API Key など）は `config.json` に集約し、変更しやすい構造にする。
 - 定期実行はローカル環境で自動化し、cron で1時間ごとに実行する。
 - テスト実行を手軽にするため、単発実行コマンドを用意する。
 - ローカルWebサーバを起動し、ブラウザ管理画面で監視対象（商品名・URL・ターゲット価格）を追加・編集・削除できるようにする。
@@ -20,6 +20,15 @@ GitHub Copilotを活用したECサイト価格監視ツールのMVP構築方針
 - 必要に応じて Amazon など特定ECサイト向けの価格抽出ロジックを追加する。
 
 ## 実施方針
+
+### Step 0: 通知疎通確認の最小実装
+まずは価格監視ロジックに入る前に、通知経路のみを検証する。
+
+- `--once` オプションは Step 0 では「Slackへ通知を1回送るのみ」の動作とする。
+- Step 0 ではスクレイピングは実行しない（通知疎通確認専用）。
+- API Key、Webhook URL、チャンネル情報など通知設定は `config.json` の `notification` セクションに格納する。
+- `config.json` は通知設定を差し替えしやすいキー構造にする（例: `provider`, `webhook_url`, `api_key`, `channel`）。
+- Step 0 の完了条件は「`--once` 実行でSlack通知が1件届くこと」とする。
 
 ### Step 1: 価格取得と通知のコアロジック作成
 `main.py` を作成し、以下の要件を満たす。
@@ -40,6 +49,7 @@ GitHub Copilotを活用したECサイト価格監視ツールのMVP構築方針
 - ローカル環境変数設定用の `.env.example` を作成する。
 - 手軽なテスト用に、`make test-run`（または同等の実行スクリプト）を用意する。
 - 画面要件整理用に `00_request/browser_admin_requirements_template.md` を作成し、実装前に入力する。
+- `config.json` に通知設定セクション（Webhook URL/API Key 等）を持たせる。
 
 ### Step 3: 自動実行設定
 ローカルOSのスケジューラにより、定期実行できるようにする。
@@ -47,7 +57,7 @@ GitHub Copilotを活用したECサイト価格監視ツールのMVP構築方針
 - cron 設定例を `README.md` に記載する。
 - 実行環境はローカル Linux を想定する。
 - Python と Playwright の依存関係、およびブラウザのインストール手順を含める。
-- Slack Webhook URL はローカル環境変数 `SLACK_WEBHOOK_URL` から取得する。
+- Slack通知設定は `config.json` の通知セクションから取得する。
 - 毎時実行の cron 例を用意し、JST運用であることが分かる記載にする。
 - お試し通知用に、`--test-notify` オプション（通知のみ確認）を実装する。
 
@@ -96,7 +106,7 @@ GitHub Copilotを活用したECサイト価格監視ツールのMVP構築方針
 #### Step 5-5: 非機能/セキュリティ/テスト
 - 起動方法は `make run-web`（または同等のコマンド）で統一し、ローカル環境で即時起動可能にする。
 - ローカル単一ユーザ利用を前提とし、応答目標は通常操作で2秒以内を目安とする。
-- `SLACK_WEBHOOK_URL` は環境変数のみで管理し、画面表示やログへの平文出力を禁止する。
+- API Key/Webhook URL は `config.json` 管理とし、画面表示やログへの平文出力を禁止する。
 - 最低限の受け入れ条件として、追加・編集・削除、今すぐ監視実行、通知テストがブラウザから成功することを確認する。
 
 ## Copilotへの依頼方針
@@ -105,8 +115,9 @@ GitHub Copilotを活用したECサイト価格監視ツールのMVP構築方針
 - 生成コードは都度確認し、セレクタや通知条件、ローカル定期実行設定を実運用向けに調整する。
 
 ## 次のアクション
-1. Step 1のプロンプトを使って `main.py` を生成する。
-2. Step 2のプロンプトで `config.json` と `requirements.txt` と `.env.example` を作成する。
-3. Step 3のプロンプトで cron 設定例とテスト実行コマンドを追加する。
-4. 必要に応じて Step 4 で Amazon向けの価格抽出処理を実装する。
-5. Step 5の要件詳細に沿って、ブラウザ管理画面を実装する。
+1. Step 0のプロンプトで `--once` 通知のみ実行を先に実装する。
+2. Step 1のプロンプトを使って `main.py` の価格取得ロジックを生成する。
+3. Step 2のプロンプトで `config.json` と `requirements.txt` と `.env.example` を作成する。
+4. Step 3のプロンプトで cron 設定例とテスト実行コマンドを追加する。
+5. 必要に応じて Step 4 で Amazon向けの価格抽出処理を実装する。
+6. Step 5の要件詳細に沿って、ブラウザ管理画面を実装する。
