@@ -1,0 +1,3 @@
+id,scenario,type,expected
+ITC-001,CLI once with config,normal,exit code 0 and sent message
+ITC-002,CLI once with missing webhook,error,exit code 1 and error message

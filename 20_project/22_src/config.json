@@ -1,0 +1,21 @@
+{
+  "notification": {
+    "provider": "slack",
+    "webhook_url": "http://127.0.0.1:8765/slack",
+    "api_key": "",
+    "channel": "#alerts",
+    "test_message": "[Step0] alertStatusLocal notification check",
+    "enabled": true
+  },
+  "items": [
+    {
+      "id": "item-1",
+      "name": "Sample Item",
+      "url": "https://example.com/product",
+      "target_price": 1000,
+      "price_selector": "#price",
+      "last_price": null,
+      "last_checked_at": null
+    }
+  ]
+}

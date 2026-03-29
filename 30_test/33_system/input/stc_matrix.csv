@@ -1,0 +1,3 @@
+id,scenario,type,expected
+STC-001,Web UI available,normal,GET / returns 200
+STC-002,Web UI run-once path,error-safe,POST /run-once without valid webhook returns redirect with error
